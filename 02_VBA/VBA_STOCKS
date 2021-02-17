@@ -1,0 +1,99 @@
+Sub Stocks()
+
+Dim Ticker As String
+
+Cells(1, 9) = "Ticker"
+Cells(1, 10) = "Yearly Change"
+Cells(1, 11) = "Percentage Change"
+Cells(1, 12) = "Total Stock Volume"
+Cells(1, 16) = "Ticker"
+Cells(1, 17) = "Value"
+Cells(2, 15) = "Greatest % Increase"
+Cells(3, 15) = "Greatest % Decrease"
+Cells(4, 15) = "Greatest Total Volume"
+Range("H1:Q1").Columns.AutoFit
+Columns("O").ColumnWidth = 25
+
+Dim Total_Stock_Volume As Double
+Total_Stock_Volume = 0
+
+Dim Ticker_Table_Row As Integer
+Ticker_Table_Row = 2
+lastrow = Cells(Rows.Count, 1).End(xlUp).Row
+
+For i = 2 To lastrow
+
+    If Cells(i + 1, 1).Value <> Cells(i, 1).Value Then
+        Ticker = Cells(i, 1).Value
+        Total_Stock_Volume = Total_Stock_Volume + Cells(i, 7).Value
+        Range("I" & Ticker_Table_Row).Value = Ticker
+        Range("L" & Ticker_Table_Row).Value = Total_Stock_Volume
+        Ticker_Table_Row = Ticker_Table_Row + 1
+        Total_Stock_Volume = 0
+    Else
+        Total_Stock_Volume = Total_Stock_Volume + Cells(i, 7).Value
+    End If
+    Next i
+    
+End Sub
+
+Sub YearlyChange()
+
+Dim Open_Price As Double
+
+Dim Close_Price As Double
+
+Dim Change_Price As Double
+
+Dim Percent_Change As Double
+
+
+Dim Change_Table_Row As Integer
+Change_Table_Row = 2
+lastrow = Cells(Rows.Count, 1).End(xlUp).Row
+
+Dim c As Long
+
+Open_Price = Cells(2, 3).Value
+
+For i = 2 To lastrow
+        If Cells(i + 1, 1).Value <> Cells(i, 1).Value Then
+            Open_Price = Cells(i + 1, 3).Value
+            Change_Table_Row = Change_Table_Row + 1
+    Else
+        Close_Price = Cells(i + 1, 6).Value
+        Change_Price = Close_Price - Open_Price
+        Range("J" & Change_Table_Row).Value = Change_Price
+        Percent_Change = (Close_Price - Open_Price) / Open_Price
+        On Error Resume Next
+        Range("K" & Change_Table_Row).Value = Percent_Change
+    End If
+    Next i
+Cells(2, 17) = Application.WorksheetFunction.Max(Range("K2:K" & lastrow))
+Cells(2, 17).NumberFormat = "0.00%"
+Cells(3, 17) = Application.WorksheetFunction.Min(Range("K2:K" & lastrow))
+Cells(3, 17).NumberFormat = "0.00%"
+Cells(4, 17) = Application.WorksheetFunction.Max(Range("L2:L" & lastrow))
+Range("K2:K" & lastrow).NumberFormat = "0.00%"
+
+
+For c = 2 To lastrow
+    If Range("J" & c).Value >= 0 Then
+        Range("J" & c).Interior.ColorIndex = 4
+    Else
+        Range("J" & c).Interior.ColorIndex = 3
+End If
+Next c
+End Sub
+
+Sub WorksheetsLoop()
+
+Dim Ws As Worksheet
+
+For Each Ws In Worksheets
+    Ws.Activate
+    Stocks
+    YearlyChange
+Next
+
+End Sub
